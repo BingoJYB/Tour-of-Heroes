@@ -22,6 +22,7 @@ export class HeroService {
         private messageService: MessageService) {
     }
 
+    /** GET heroes from the server */
     getHeroes(): Observable<Hero[]> {
         return this.http.get<Hero[]>(this.heroesUrl)
             .pipe(
@@ -30,6 +31,7 @@ export class HeroService {
             );
     }
 
+    /** GET hero by id. Will 404 if id not found */
     getHero(id: number): Observable<Hero> {
         const url = `${this.heroesUrl}/${id}`;
         return this.http.get<Hero>(url)
@@ -63,6 +65,18 @@ export class HeroService {
         return this.http.put(this.heroesUrl, hero, httpOptions).pipe(
             tap(_ => this.log(`updated hero id=${hero.id}`)),
             catchError(this.handleError<any>('updateHero'))
+        );
+    }
+
+    /** GET heroes whose name contains search term */
+    searchHeroes(term: string): Observable<Hero[]> {
+        if (!term.trim()) {
+            // if not search term, return empty hero array.
+            return Observable.of([]);
+        }
+        return this.http.get<Hero[]>(`${this.heroesUrl}/?name=${term}`).pipe(
+            tap(_ => this.log(`found heroes matching "${term}"`)),
+            catchError(this.handleError<Hero[]>('searchHeroes', []))
         );
     }
 
